@@ -7,3 +7,55 @@
  *   .ce-news-ticker { ... }
  *   .ce-article-card { ... }
  */
+
+/* ─── Post Slider ──────────────────────────────────────────────────────────── */
+
+.ce-post-slider {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.ce-post-slider__track {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ce-post-slider__slide {
+    text-align: center;
+}
+
+.ce-post-slider__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.ce-post-slider__image {
+    margin: 0;
+    line-height: 0;
+}
+
+.ce-post-slider__image img {
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    height: 500px;
+    object-fit: cover;
+    margin: 0 auto;
+}
+
+.ce-post-slider__title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 0 8px 8px;
+}
+
+.ce-post-slider__empty {
+    padding: 16px;
+    text-align: center;
+    color: #777;
+}

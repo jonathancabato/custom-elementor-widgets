@@ -14,6 +14,31 @@
 (function ($) {
     'use strict';
 
-    // Widget frontend handlers will be added here as widgets are created.
+    // ─── Post Slider ──────────────────────────────────────────────────────────
+    //
+    // Must be wrapped in elementor/frontend/init so that elementorFrontend
+    // is guaranteed to exist before we register the hook.
+
+    $(window).on('elementor/frontend/init', function () {
+        elementorFrontend.hooks.addAction(
+            'frontend/element_ready/ce-post-slider.default',
+            function ($scope) {
+                var $wrapper = $scope.find('.ce-post-slider');
+                var $track = $wrapper.find('.ce-post-slider__track');
+                var mode = $wrapper.data('mode') || 'horizontal';
+
+                $track.bxSlider({
+                    mode: mode,
+                    pager: true,
+                    controls: true,
+                    auto: true,
+                    autoHover: true,
+                    speed: 500,
+                    pause: 4000,
+                    adaptiveHeight: mode === 'vertical'
+                });
+            }
+        );
+    });
 
 })(jQuery);
