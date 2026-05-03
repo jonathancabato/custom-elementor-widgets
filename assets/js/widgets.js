@@ -113,4 +113,91 @@
         );
     });
 
+    // ─── Post Grid ────────────────────────────────────────────────────────────
+
+    $(window).on('elementor/frontend/init', function () {
+        elementorFrontend.hooks.addAction(
+            'frontend/element_ready/ce-post-grid.default',
+            function ($scope) {
+                var $grid = $scope.find('.ce-post-grid');
+                var $inner = $grid.find('.ce-post-grid__grid');
+                var $btn = $grid.find('.ce-post-grid__load-more');
+
+                if (!$btn.length) return;
+
+                var loading = false;
+                var ppl = parseInt($grid.data('ppl'), 10) || 6;
+
+                /**
+                 * Build N skeleton card elements matching the real card structure.
+                 * @param {number} count
+                 * @returns {string} HTML string
+                 */
+                function buildSkeletons(count) {
+                    var html = '';
+                    for (var i = 0; i < count; i++) {
+                        html +=
+                            '<article class="ce-post-grid__card ce-post-grid__card--skeleton">' +
+                            '<div class="ce-post-grid__card-link">' +
+                            '<figure class="ce-post-grid__thumb"></figure>' +
+                            '<div class="ce-post-grid__card-body">' +
+                            '<span class="ce-post-grid__skel-block ce-post-grid__skel-block--cat"></span>' +
+                            '<span class="ce-post-grid__skel-block ce-post-grid__skel-block--title"></span>' +
+                            '<span class="ce-post-grid__skel-block ce-post-grid__skel-block--title-2"></span>' +
+                            '<span class="ce-post-grid__skel-block ce-post-grid__skel-block--date"></span>' +
+                            '</div>' +
+                            '</div>' +
+                            '</article>';
+                    }
+                    return html;
+                }
+
+                $btn.on('click', function () {
+                    if (loading) return;
+
+                    loading = true;
+                    $btn.prop('disabled', true).addClass('ce-post-grid__load-more--loading');
+
+                    // Inject skeleton placeholders immediately
+                    $inner.append(buildSkeletons(ppl));
+
+                    var nextPage = parseInt($grid.data('page'), 10) + 1;
+
+                    $.ajax({
+                        url: (typeof ceAjax !== 'undefined') ? ceAjax.url : '',
+                        type: 'POST',
+                        data: {
+                            action: 'ce_post_grid_load_more',
+                            nonce: (typeof ceAjax !== 'undefined') ? ceAjax.nonce : '',
+                            page: nextPage,
+                            ppl: ppl,
+                            cats: $grid.data('cats') || '',
+                            card_style: $grid.data('card-style') || 'standard'
+                        },
+                        success: function (res) {
+                            // Remove skeletons regardless of outcome
+                            $inner.find('.ce-post-grid__card--skeleton').remove();
+
+                            if (res && res.success) {
+                                $inner.append(res.data.html);
+                                $grid.data('page', nextPage);
+
+                                if (!res.data.has_more) {
+                                    $btn.attr('hidden', true);
+                                }
+                            }
+                        },
+                        error: function () {
+                            $inner.find('.ce-post-grid__card--skeleton').remove();
+                        },
+                        complete: function () {
+                            loading = false;
+                            $btn.prop('disabled', false).removeClass('ce-post-grid__load-more--loading');
+                        }
+                    });
+                });
+            }
+        );
+    });
+
 })(jQuery);
