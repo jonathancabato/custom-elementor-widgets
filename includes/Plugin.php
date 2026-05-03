@@ -60,6 +60,8 @@ final class Plugin {
 	public function register_image_sizes(): void {
 		add_image_size( 'magazine_thumbnail', 600,  400, true );
 		add_image_size( 'post_slider',        1200, 500, true );
+		add_image_size( 'post_slider_wide',   1920, 600, true );
+		add_image_size( 'post_slider_tall',   900,  600, true );
 		add_image_size( 'slider_thumbnail',   150,  100, true );
 	}
 
