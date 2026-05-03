@@ -44,6 +44,7 @@ final class Plugin {
 	 * Register all plugin hooks with WordPress / Elementor.
 	 */
 	private function register_hooks(): void {
+		add_action( 'after_setup_theme',                       [ $this, 'register_image_sizes' ] );
 		add_action( 'elementor/init',                          [ $this, 'load_textdomain' ] );
 		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ] );
 		add_action( 'elementor/widgets/register',              [ $this, 'register_widgets' ] );
@@ -52,6 +53,17 @@ final class Plugin {
 	}
 
 	// ─── Callbacks ────────────────────────────────────────────────────────────
+
+	/**
+	 * Register custom image sizes.
+	 */
+	public function register_image_sizes(): void {
+		add_image_size( 'magazine_thumbnail', 600,  400, true );
+		add_image_size( 'post_slider',        1200, 500, true );
+		add_image_size( 'post_slider_wide',   1920, 600, true );
+		add_image_size( 'post_slider_tall',   900,  600, true );
+		add_image_size( 'slider_thumbnail',   150,  100, true );
+	}
 
 	/**
 	 * Load plugin text domain for translations.
@@ -90,9 +102,16 @@ final class Plugin {
 	}
 
 	/**
-	 * Enqueue the shared frontend stylesheet.
+	 * Enqueue the shared frontend stylesheet and register third-party styles.
 	 */
 	public function enqueue_styles(): void {
+		wp_register_style(
+			'bxslider',
+			'https://cdn.jsdelivr.net/npm/bxslider@4.2.17/dist/jquery.bxslider.min.css',
+			[],
+			'4.2.17'
+		);
+
 		wp_enqueue_style(
 			'custom-elements',
 			CUSTOM_ELEMENTS_URL . 'assets/css/widgets.css',
@@ -102,13 +121,21 @@ final class Plugin {
 	}
 
 	/**
-	 * Register the shared frontend script (widgets enqueue it on demand).
+	 * Register the shared frontend script and third-party libraries (widgets enqueue on demand).
 	 */
 	public function register_scripts(): void {
 		wp_register_script(
+			'bxslider',
+			'https://cdn.jsdelivr.net/npm/bxslider@4.2.17/dist/jquery.bxslider.min.js',
+			[ 'jquery' ],
+			'4.2.17',
+			true
+		);
+
+		wp_register_script(
 			'custom-elements',
 			CUSTOM_ELEMENTS_URL . 'assets/js/widgets.js',
-			[ 'jquery' ],
+			[ 'jquery', 'bxslider' ],
 			CUSTOM_ELEMENTS_VERSION,
 			true
 		);
