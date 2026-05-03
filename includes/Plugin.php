@@ -44,6 +44,7 @@ final class Plugin {
 	 * Register all plugin hooks with WordPress / Elementor.
 	 */
 	private function register_hooks(): void {
+		add_action( 'after_setup_theme',                       [ $this, 'register_image_sizes' ] );
 		add_action( 'elementor/init',                          [ $this, 'load_textdomain' ] );
 		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ] );
 		add_action( 'elementor/widgets/register',              [ $this, 'register_widgets' ] );
@@ -52,6 +53,13 @@ final class Plugin {
 	}
 
 	// ─── Callbacks ────────────────────────────────────────────────────────────
+
+	/**
+	 * Register custom image sizes.
+	 */
+	public function register_image_sizes(): void {
+		add_image_size( 'magazine_thumbnail', 600, 400, true );
+	}
 
 	/**
 	 * Load plugin text domain for translations.
