@@ -222,6 +222,33 @@ class Post_Grid extends \Elementor\Widget_Base {
 
 		$this->end_controls_section();
 
+		// ── Card Design ───────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_card_design',
+			[
+				'label' => esc_html__( 'Card Design', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'card_style',
+			[
+				'label'   => esc_html__( 'Style', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'standard'   => esc_html__( 'Standard',   'custom-elements' ),
+					'overlay'    => esc_html__( 'Overlay',    'custom-elements' ),
+					'horizontal' => esc_html__( 'Horizontal', 'custom-elements' ),
+					'card'       => esc_html__( 'Card',       'custom-elements' ),
+					'magazine'   => esc_html__( 'Magazine',   'custom-elements' ),
+				],
+				'default' => 'standard',
+			]
+		);
+
+		$this->end_controls_section();
+
 		// ── Post Title Size ───────────────────────────────────────────────────
 		$this->start_controls_section(
 			'section_post_title',
@@ -360,6 +387,8 @@ class Post_Grid extends \Elementor\Widget_Base {
 		$posts_per_page = max( 1, (int) ( $settings['posts_per_page'] ?? 6 ) );
 		$columns        = in_array( (string) ( $settings['columns'] ?? '3' ), [ '1', '2', '3', '4', '5', '6' ], true )
 							? (string) $settings['columns'] : '3';
+		$card_style     = in_array( $settings['card_style'] ?? 'standard', [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ], true )
+							? $settings['card_style'] : 'standard';
 		$show_title_bar   = ( $settings['show_title_bar'] ?? 'yes' ) === 'yes';
 		$title_bar_text   = sanitize_text_field( $settings['title_bar_text'] ?? '' );
 		$title_bar_tag    = in_array( $settings['title_bar_tag'] ?? 'h2', [ 'h1', 'h2', 'h3', 'h4', 'div' ], true )
@@ -416,6 +445,7 @@ class Post_Grid extends \Elementor\Widget_Base {
 			data-cats="<?php echo $cat_ids_encoded; ?>"
 			data-page="1"
 			data-has-more="<?php echo $has_more ? '1' : '0'; ?>"
+			data-card-style="<?php echo esc_attr( $card_style ); ?>"
 			style="--ce-grid-title-bar-fs: <?php echo esc_attr( $title_bar_fs ); ?>; --ce-grid-post-title-fs: <?php echo esc_attr( $post_title_fs ); ?>;">
 
 			<?php if ( $show_header ) : ?>
@@ -439,7 +469,7 @@ class Post_Grid extends \Elementor\Widget_Base {
 				if ( $query->have_posts() ) {
 					while ( $query->have_posts() ) {
 						$query->the_post();
-						self::render_card( get_the_ID() );
+						self::render_card( get_the_ID(), $card_style );
 					}
 					wp_reset_postdata();
 				} else {
@@ -464,29 +494,38 @@ class Post_Grid extends \Elementor\Widget_Base {
 	 * Render a single post card.
 	 * Called from render() and ajax_load_more() so output is identical.
 	 *
-	 * @param int $post_id
+	 * @param int    $post_id
+	 * @param string $card_style  One of: standard | overlay | horizontal | card | magazine
 	 */
-	public static function render_card( int $post_id ): void {
+	public static function render_card( int $post_id, string $card_style = 'standard' ): void {
+		$valid_styles = [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ];
+		$card_style   = in_array( $card_style, $valid_styles, true ) ? $card_style : 'standard';
+
 		$permalink = get_permalink( $post_id );
 		$title     = get_the_title( $post_id );
 		$date      = get_the_date( get_option( 'date_format' ), $post_id );
 		$date_iso  = get_the_date( 'c', $post_id );
 		$cats      = get_the_category( $post_id );
 		$cat_name  = ! empty( $cats ) ? esc_html( $cats[0]->name ) : '';
+		$cat_link  = ! empty( $cats ) ? esc_url( (string) get_category_link( $cats[0]->term_id ) ) : '';
 		$thumb     = get_the_post_thumbnail( $post_id, 'magazine_thumbnail' );
+		$no_image  = ! $thumb;
 		?>
-		<article class="ce-post-grid__card">
+		<article class="ce-post-grid__card ce-post-grid__card--<?php echo esc_attr( $card_style ); ?>">
 			<a href="<?php echo esc_url( (string) $permalink ); ?>" class="ce-post-grid__card-link">
-				<figure class="ce-post-grid__thumb<?php echo ! $thumb ? ' ce-post-grid__thumb--no-image' : ''; ?>">
+				<figure class="ce-post-grid__thumb<?php echo $no_image ? ' ce-post-grid__thumb--no-image' : ''; ?>">
 					<?php if ( $thumb ) : ?>
 						<?php echo $thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php else : ?>
 						<span class="ce-post-grid__thumb-placeholder" aria-hidden="true"></span>
 					<?php endif; ?>
+					<?php if ( $cat_name && in_array( $card_style, [ 'magazine', 'overlay' ], true ) ) : ?>
+					<span class="ce-post-grid__cat-badge"><?php echo $cat_name; ?></span>
+					<?php endif; ?>
 				</figure>
 				<div class="ce-post-grid__card-body">
-					<?php if ( $cat_name ) : ?>
-					<span class="ce-post-grid__cat"><?php echo $cat_name; // already escaped via esc_html() above ?></span>
+					<?php if ( $cat_name && ! in_array( $card_style, [ 'magazine', 'overlay' ], true ) ) : ?>
+					<span class="ce-post-grid__cat"><?php echo $cat_name; ?></span>
 					<?php endif; ?>
 					<h3 class="ce-post-grid__post-title"><?php echo esc_html( $title ); ?></h3>
 					<time class="ce-post-grid__date" datetime="<?php echo esc_attr( (string) $date_iso ); ?>">
@@ -519,6 +558,9 @@ class Post_Grid extends \Elementor\Widget_Base {
 		$posts_per_load = max( 1, min( 24, (int) ( $_POST['ppl'] ?? 6 ) ) );
 		$cats_raw       = isset( $_POST['cats'] ) ? sanitize_text_field( wp_unslash( $_POST['cats'] ) ) : '';
 		$categories     = array_filter( array_map( 'intval', explode( ',', $cats_raw ) ) );
+		$valid_styles   = [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ];
+		$card_style_raw = isset( $_POST['card_style'] ) ? sanitize_text_field( wp_unslash( $_POST['card_style'] ) ) : 'standard';
+		$card_style     = in_array( $card_style_raw, $valid_styles, true ) ? $card_style_raw : 'standard';
 
 		// ── Query ─────────────────────────────────────────────────────────────
 		$args = [
@@ -541,7 +583,7 @@ class Post_Grid extends \Elementor\Widget_Base {
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				self::render_card( get_the_ID() );
+				self::render_card( get_the_ID(), $card_style );
 			}
 			wp_reset_postdata();
 		}

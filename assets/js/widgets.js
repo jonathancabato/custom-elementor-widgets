@@ -171,7 +171,8 @@
                             nonce: (typeof ceAjax !== 'undefined') ? ceAjax.nonce : '',
                             page: nextPage,
                             ppl: ppl,
-                            cats: $grid.data('cats') || ''
+                            cats: $grid.data('cats') || '',
+                            card_style: $grid.data('card-style') || 'standard'
                         },
                         success: function (res) {
                             // Remove skeletons regardless of outcome

@@ -410,6 +410,7 @@
 
 /* ── Card ── */
 
+/* Base — shared by all card styles */
 .ce-post-grid__card {
     position: relative;
     min-width: 0;
@@ -487,6 +488,169 @@
 .ce-post-grid__date {
     font-size: 0.75rem;
     color: #999;
+}
+
+/* Category badge — used by overlay & magazine styles (on image) */
+.ce-post-grid__cat-badge {
+    position: absolute;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: #c00;
+    padding: 3px 8px;
+    line-height: 1.6;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 1 · Standard (default)
+   Stacked image → meta → title → date. No extra rules needed beyond base.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 2 · Overlay
+   Title + date sit on top of the image via a bottom gradient.
+   Category badge is pinned top-left on the image.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--overlay .ce-post-grid__card-link {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    display: block;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 0;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__cat-badge {
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__card-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 48px 14px 14px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, transparent 100%);
+    z-index: 1;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__post-title {
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__card-link:hover .ce-post-grid__post-title {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__date {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 3 · Horizontal
+   Fixed-width thumbnail on the left, text on the right.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--horizontal .ce-post-grid__card-link {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__thumb {
+    width: 110px;
+    flex-shrink: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: 4px;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__card-body {
+    flex: 1;
+    padding: 0;
+    min-width: 0;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__post-title {
+    font-size: calc(var(--ce-grid-post-title-fs, 0.9375rem) * 0.95);
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 4 · Card
+   White boxed card with border-radius and a subtle lift shadow on hover.
+   Image fills the top, content is padded inside the box.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.ce-post-grid__card--card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.ce-post-grid__card--card .ce-post-grid__thumb {
+    border-radius: 0;
+    aspect-ratio: 16 / 9;
+}
+
+.ce-post-grid__card--card .ce-post-grid__card-body {
+    padding: 14px 16px 16px;
+}
+
+.ce-post-grid__card--card .ce-post-grid__card-link:hover .ce-post-grid__post-title {
+    color: #333;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 5 · Magazine
+   Taller aspect-ratio image with a coloured category badge overlaid
+   top-left, and a larger, bolder title below the image.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--magazine .ce-post-grid__card-link {
+    position: relative;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__thumb {
+    aspect-ratio: 3 / 2;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__cat-badge {
+    top: 0;
+    left: 0;
+    border-radius: 0 0 4px 0;
+    padding: 4px 10px;
+    font-size: 0.6875rem;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__card-body {
+    padding: 12px 0 6px;
+    border-top: 3px solid #111;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__post-title {
+    font-size: calc(var(--ce-grid-post-title-fs, 0.9375rem) * 1.1);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
 }
 
 /* ── Footer (bottom load-more positions) ── */
