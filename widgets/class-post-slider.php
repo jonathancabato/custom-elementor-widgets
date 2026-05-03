@@ -121,6 +121,20 @@ class Post_Slider extends \Elementor\Widget_Base {
 			]
 		);
 
+		$this->add_control(
+			'pager_type',
+			[
+				'label'   => esc_html__( 'Pager Style', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'basic'     => esc_html__( 'Basic (dots)', 'custom-elements' ),
+					'thumbnail' => esc_html__( 'Thumbnail', 'custom-elements' ),
+					'none'      => esc_html__( 'None (hidden)', 'custom-elements' ),
+				],
+				'default' => 'basic',
+			]
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -157,12 +171,15 @@ class Post_Slider extends \Elementor\Widget_Base {
 	protected function render(): void {
 		$settings = $this->get_settings_for_display();
 
-		$category  = ! empty( $settings['category'] ) ? (int) $settings['category'] : 0;
-		$posts_min = max( 1, (int) ( $settings['posts_min'] ?? 3 ) );
-		$posts_max = max( $posts_min, (int) ( $settings['posts_max'] ?? 8 ) );
-		$mode      = in_array( $settings['transition_mode'], [ 'horizontal', 'vertical', 'fade' ], true )
+		$category   = ! empty( $settings['category'] ) ? (int) $settings['category'] : 0;
+		$posts_min  = max( 1, (int) ( $settings['posts_min'] ?? 3 ) );
+		$posts_max  = max( $posts_min, (int) ( $settings['posts_max'] ?? 8 ) );
+		$mode       = in_array( $settings['transition_mode'], [ 'horizontal', 'vertical', 'fade' ], true )
 						? $settings['transition_mode']
 						: 'horizontal';
+		$pager_type = in_array( $settings['pager_type'] ?? 'basic', [ 'basic', 'thumbnail', 'none' ], true )
+						? $settings['pager_type']
+						: 'basic';
 
 		$args = [
 			'post_type'      => 'post',
@@ -188,10 +205,11 @@ class Post_Slider extends \Elementor\Widget_Base {
 		?>
 		<div class="ce-post-slider"
 			id="ce-post-slider-<?php echo $widget_id; ?>"
-			data-mode="<?php echo esc_attr( $mode ); ?>">
+			data-mode="<?php echo esc_attr( $mode ); ?>"
+			data-pager="<?php echo esc_attr( $pager_type ); ?>">
 			<ul class="ce-post-slider__track bxslider">
 				<?php while ( $query->have_posts() ) : $query->the_post(); ?>
-					<li class="ce-post-slider__slide">
+					<li class="ce-post-slider__slide" data-thumb="<?php echo esc_url( (string) get_the_post_thumbnail_url( get_the_ID(), 'slider_thumbnail' ) ); ?>">
 						<a href="<?php echo esc_url( get_permalink() ); ?>" class="ce-post-slider__link">
 							<?php if ( has_post_thumbnail() ) : ?>
 								<figure class="ce-post-slider__image">
