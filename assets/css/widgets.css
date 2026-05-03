@@ -104,7 +104,9 @@
     right: 0;
     padding: 60px 28px 28px;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, transparent 100%);
-    font-size: 3.35rem;
+    /* Controlled by the --ce-slider-title-fs CSS custom property set inline
+       by the widget. Falls back to 2.25rem (36px) if the variable is absent. */
+    font-size: var(--ce-slider-title-fs, 2.25rem);
     font-weight: 700;
     line-height: 1.3;
     letter-spacing: 0.01em;

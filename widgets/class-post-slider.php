@@ -135,6 +135,42 @@ class Post_Slider extends \Elementor\Widget_Base {
 			]
 		);
 
+		$this->add_control(
+			'title_font_size',
+			[
+				'label'       => esc_html__( 'Title Font Size', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				// Keys are valid CSS values — adding more presets later is just
+				// a matter of appending another entry here.
+				'options'     => [
+					'1rem'    => esc_html__( '1rem   — 16px base',   'custom-elements' ),
+					'1.25rem' => esc_html__( '1.25rem — 20px',       'custom-elements' ),
+					'1.5rem'  => esc_html__( '1.5rem  — 24px',       'custom-elements' ),
+					'1.875rem'=> esc_html__( '1.875rem — 30px',      'custom-elements' ),
+					'2.25rem' => esc_html__( '2.25rem — 36px',       'custom-elements' ),
+					'3rem'    => esc_html__( '3rem    — 48px',        'custom-elements' ),
+					'3.75rem' => esc_html__( '3.75rem — 60px',       'custom-elements' ),
+					'4.5rem'  => esc_html__( '4.5rem  — 72px',       'custom-elements' ),
+					'custom'  => esc_html__( 'Custom…',             'custom-elements' ),
+				],
+				'default' => '2.25rem',
+			]
+		);
+
+		$this->add_control(
+			'title_font_size_custom',
+			[
+				'label'      => esc_html__( 'Custom Size', 'custom-elements' ),
+				'type'       => \Elementor\Controls_Manager::NUMBER,
+				'min'        => 8,
+				'max'        => 200,
+				'step'       => 1,
+				'default'    => 36,
+				'description'=> esc_html__( 'Value in pixels.', 'custom-elements' ),
+				'condition'  => [ 'title_font_size' => 'custom' ],
+			]
+		);
+
 		$this->end_controls_section();
 
 		// --- Slider Section ---
@@ -226,6 +262,16 @@ class Post_Slider extends \Elementor\Widget_Base {
 							? $settings['image_size']
 							: 'post_slider';
 
+		// Font size: preset key is a ready-to-use CSS value; custom falls back
+		// to a pixel number entered by the user.
+		$fs_preset = $settings['title_font_size'] ?? '2.25rem';
+		if ( 'custom' === $fs_preset ) {
+			$fs_value = ( (int) ( $settings['title_font_size_custom'] ?? 36 ) ) . 'px';
+		} else {
+			$valid_presets = [ '1rem', '1.25rem', '1.5rem', '1.875rem', '2.25rem', '3rem', '3.75rem', '4.5rem' ];
+			$fs_value = in_array( $fs_preset, $valid_presets, true ) ? $fs_preset : '2.25rem';
+		}
+
 		$args = [
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
@@ -250,6 +296,7 @@ class Post_Slider extends \Elementor\Widget_Base {
 		?>
 		<div class="ce-post-slider"
 			id="ce-post-slider-<?php echo $widget_id; ?>"
+			style="--ce-slider-title-fs: <?php echo esc_attr( $fs_value ); ?>"
 			data-mode="<?php echo esc_attr( $mode ); ?>"
 			data-pager="<?php echo esc_attr( $pager_type ); ?>"
 			data-layout="<?php echo esc_attr( $slider_width ); ?>"
