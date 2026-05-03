@@ -134,6 +134,23 @@ class Post_Grid extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'title_bar_style',
+			[
+				'label'     => esc_html__( 'Style', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'border-left' => esc_html__( 'Border Left',   'custom-elements' ),
+					'underline'   => esc_html__( 'Underline',     'custom-elements' ),
+					'filled'      => esc_html__( 'Filled Bar',    'custom-elements' ),
+					'tag'         => esc_html__( 'Tag / Label',   'custom-elements' ),
+					'double-rule' => esc_html__( 'Double Rule',   'custom-elements' ),
+				],
+				'default'   => 'border-left',
+				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
 			'title_bar_text',
 			[
 				'label'       => esc_html__( 'Title', 'custom-elements' ),
@@ -151,6 +168,7 @@ class Post_Grid extends \Elementor\Widget_Base {
 				'label'     => esc_html__( 'HTML Tag', 'custom-elements' ),
 				'type'      => \Elementor\Controls_Manager::SELECT,
 				'options'   => [
+					'h1'  => 'H1',
 					'h2'  => 'H2',
 					'h3'  => 'H3',
 					'h4'  => 'H4',
@@ -158,6 +176,95 @@ class Post_Grid extends \Elementor\Widget_Base {
 				],
 				'default'   => 'h2',
 				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_font_size',
+			[
+				'label'     => esc_html__( 'Title Font Size', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'0.75rem'  => esc_html__( '0.75rem  — 12px', 'custom-elements' ),
+					'0.875rem' => esc_html__( '0.875rem — 14px', 'custom-elements' ),
+					'1rem'     => esc_html__( '1rem     — 16px', 'custom-elements' ),
+					'1.125rem' => esc_html__( '1.125rem — 18px', 'custom-elements' ),
+					'1.25rem'  => esc_html__( '1.25rem  — 20px', 'custom-elements' ),
+					'1.5rem'   => esc_html__( '1.5rem   — 24px', 'custom-elements' ),
+					'1.875rem' => esc_html__( '1.875rem — 30px', 'custom-elements' ),
+					'2.25rem'  => esc_html__( '2.25rem  — 36px', 'custom-elements' ),
+					'3rem'     => esc_html__( '3rem     — 48px', 'custom-elements' ),
+					'3.75rem'  => esc_html__( '3.75rem  — 60px', 'custom-elements' ),
+					'4.5rem'   => esc_html__( '4.5rem   — 72px', 'custom-elements' ),
+					'custom'   => esc_html__( 'Custom…',          'custom-elements' ),
+				],
+				'default'   => '1.125rem',
+				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_font_size_custom',
+			[
+				'label'       => esc_html__( 'Custom Size', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'min'         => 8,
+				'max'         => 200,
+				'step'        => 1,
+				'default'     => 18,
+				'description' => esc_html__( 'Value in pixels.', 'custom-elements' ),
+				'condition'   => [
+					'show_title_bar'       => 'yes',
+					'title_bar_font_size'  => 'custom',
+				],
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Post Title Size ───────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_post_title',
+			[
+				'label' => esc_html__( 'Post Title', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'post_title_font_size',
+			[
+				'label'   => esc_html__( 'Font Size', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'0.75rem'  => esc_html__( '0.75rem  — 12px', 'custom-elements' ),
+					'0.875rem' => esc_html__( '0.875rem — 14px', 'custom-elements' ),
+					'1rem'     => esc_html__( '1rem     — 16px', 'custom-elements' ),
+					'1.125rem' => esc_html__( '1.125rem — 18px', 'custom-elements' ),
+					'1.25rem'  => esc_html__( '1.25rem  — 20px', 'custom-elements' ),
+					'1.5rem'   => esc_html__( '1.5rem   — 24px', 'custom-elements' ),
+					'1.875rem' => esc_html__( '1.875rem — 30px', 'custom-elements' ),
+					'2.25rem'  => esc_html__( '2.25rem  — 36px', 'custom-elements' ),
+					'3rem'     => esc_html__( '3rem     — 48px', 'custom-elements' ),
+					'3.75rem'  => esc_html__( '3.75rem  — 60px', 'custom-elements' ),
+					'4.5rem'   => esc_html__( '4.5rem   — 72px', 'custom-elements' ),
+					'custom'   => esc_html__( 'Custom…',          'custom-elements' ),
+				],
+				'default' => '0.9375rem',
+			]
+		);
+
+		$this->add_control(
+			'post_title_font_size_custom',
+			[
+				'label'       => esc_html__( 'Custom Size', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'min'         => 8,
+				'max'         => 200,
+				'step'        => 1,
+				'default'     => 15,
+				'description' => esc_html__( 'Value in pixels.', 'custom-elements' ),
+				'condition'   => [ 'post_title_font_size' => 'custom' ],
 			]
 		);
 
@@ -253,10 +360,26 @@ class Post_Grid extends \Elementor\Widget_Base {
 		$posts_per_page = max( 1, (int) ( $settings['posts_per_page'] ?? 6 ) );
 		$columns        = in_array( (string) ( $settings['columns'] ?? '3' ), [ '1', '2', '3', '4', '5', '6' ], true )
 							? (string) $settings['columns'] : '3';
-		$show_title_bar = ( $settings['show_title_bar'] ?? 'yes' ) === 'yes';
-		$title_bar_text = sanitize_text_field( $settings['title_bar_text'] ?? '' );
-		$title_bar_tag  = in_array( $settings['title_bar_tag'] ?? 'h2', [ 'h2', 'h3', 'h4', 'div' ], true )
+		$show_title_bar   = ( $settings['show_title_bar'] ?? 'yes' ) === 'yes';
+		$title_bar_text   = sanitize_text_field( $settings['title_bar_text'] ?? '' );
+		$title_bar_tag    = in_array( $settings['title_bar_tag'] ?? 'h2', [ 'h1', 'h2', 'h3', 'h4', 'div' ], true )
 							? $settings['title_bar_tag'] : 'h2';
+		$title_bar_style  = in_array( $settings['title_bar_style'] ?? 'border-left', [ 'border-left', 'underline', 'filled', 'tag', 'double-rule' ], true )
+							? $settings['title_bar_style'] : 'border-left';
+
+		// Title bar font size
+		$valid_fs = [ '0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.5rem', '1.875rem', '2.25rem', '3rem', '3.75rem', '4.5rem' ];
+		$tbfs_preset = $settings['title_bar_font_size'] ?? '1.125rem';
+		$title_bar_fs = ( 'custom' === $tbfs_preset )
+			? ( (int) ( $settings['title_bar_font_size_custom'] ?? 18 ) ) . 'px'
+			: ( in_array( $tbfs_preset, $valid_fs, true ) ? $tbfs_preset : '1.125rem' );
+
+		// Post title font size
+		$ptfs_preset = $settings['post_title_font_size'] ?? '0.9375rem';
+		$post_title_fs = ( 'custom' === $ptfs_preset )
+			? ( (int) ( $settings['post_title_font_size_custom'] ?? 15 ) ) . 'px'
+			: ( in_array( $ptfs_preset, $valid_fs, true ) ? $ptfs_preset : '0.9375rem' );
+
 		$load_more      = ( $settings['load_more_enabled'] ?? 'yes' ) === 'yes';
 		$lm_position    = in_array( $settings['load_more_position'] ?? 'bottom-center', [ 'bottom-left', 'bottom-center', 'bottom-right', 'top-right' ], true )
 							? $settings['load_more_position'] : 'bottom-center';
@@ -292,10 +415,11 @@ class Post_Grid extends \Elementor\Widget_Base {
 			data-ppl="<?php echo esc_attr( (string) $posts_per_load ); ?>"
 			data-cats="<?php echo $cat_ids_encoded; ?>"
 			data-page="1"
-			data-has-more="<?php echo $has_more ? '1' : '0'; ?>">
+			data-has-more="<?php echo $has_more ? '1' : '0'; ?>"
+			style="--ce-grid-title-bar-fs: <?php echo esc_attr( $title_bar_fs ); ?>; --ce-grid-post-title-fs: <?php echo esc_attr( $post_title_fs ); ?>;">
 
 			<?php if ( $show_header ) : ?>
-			<div class="ce-post-grid__header<?php echo ( $load_more && 'top-right' === $lm_position ) ? ' ce-post-grid__header--has-btn' : ''; ?>">
+			<div class="ce-post-grid__header ce-post-grid__header--<?php echo esc_attr( $title_bar_style ); ?><?php echo ( $load_more && 'top-right' === $lm_position ) ? ' ce-post-grid__header--has-btn' : ''; ?>">
 				<?php if ( $show_title_bar ) : ?>
 				<<?php echo esc_attr( $title_bar_tag ); ?> class="ce-post-grid__title">
 					<?php echo esc_html( $title_bar_text ); ?>

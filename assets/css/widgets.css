@@ -231,26 +231,150 @@
 
 /* ── Header (title bar + optional top-right button) ── */
 
+/* Base — shared by all styles */
 .ce-post-grid__header {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e5e5;
 }
 
 .ce-post-grid__header--has-btn {
     justify-content: space-between;
 }
 
+/* Base title reset — each style modifier overrides what it needs */
 .ce-post-grid__title {
-    font-size: 1.125rem;
+    font-size: var(--ce-grid-title-bar-fs, 1.125rem);
     font-weight: 700;
     margin: 0;
-    padding-left: 12px;
-    border-left: 4px solid #111;
     line-height: 1.3;
     letter-spacing: 0.01em;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 1 · Border Left
+   Left accent bar + full-width bottom rule
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--border-left {
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.ce-post-grid__header--border-left .ce-post-grid__title {
+    padding-left: 12px;
+    border-left: 4px solid #111;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 2 · Underline
+   Coloured underline that grows from the left only
+   under the title text; no surrounding border
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--underline {
+    padding-bottom: 0;
+}
+
+.ce-post-grid__header--underline .ce-post-grid__title {
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.ce-post-grid__header--underline .ce-post-grid__title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: #111;
+    border-radius: 2px;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 3 · Filled Bar
+   Full-width dark background strip, white title text
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--filled {
+    background: #111;
+    padding: 10px 16px;
+    border-radius: 4px;
+}
+
+.ce-post-grid__header--filled .ce-post-grid__title {
+    color: #fff;
+}
+
+.ce-post-grid__header--filled .ce-post-grid__load-more {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.ce-post-grid__header--filled .ce-post-grid__load-more:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fff;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 4 · Tag / Label
+   Title text sits inside a small dark pill;
+   a hairline rule extends to the right
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--tag {
+    gap: 12px;
+}
+
+.ce-post-grid__header--tag::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e5e5;
+}
+
+.ce-post-grid__header--has-btn.ce-post-grid__header--tag::after {
+    display: none;
+    /* rule would look odd with a button on the right */
+}
+
+.ce-post-grid__header--tag .ce-post-grid__title {
+    display: inline-block;
+    background: #111;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: calc(var(--ce-grid-title-bar-fs, 1.125rem) * 0.85);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 5 · Double Rule
+   Two horizontal rules flanking a centred title
+   (newspaper / magazine section divider)
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--double-rule {
+    gap: 14px;
+    padding: 0;
+}
+
+.ce-post-grid__header--double-rule::before,
+.ce-post-grid__header--double-rule::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: #111;
+}
+
+.ce-post-grid__header--has-btn.ce-post-grid__header--double-rule::after {
+    display: none;
+    /* suppress trailing rule when the Load More btn is present */
+}
+
+.ce-post-grid__header--double-rule .ce-post-grid__title {
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: calc(var(--ce-grid-title-bar-fs, 1.125rem) * 0.9);
 }
 
 /* ── Grid layout ── */
@@ -348,7 +472,7 @@
 }
 
 .ce-post-grid__post-title {
-    font-size: 0.9375rem;
+    font-size: var(--ce-grid-post-title-fs, 0.9375rem);
     font-weight: 700;
     margin: 0 0 6px;
     line-height: 1.45;
@@ -407,6 +531,7 @@
 .ce-post-grid__load-more:hover {
     background: #111;
     color: #fff;
+    border-color: #111;
 }
 
 .ce-post-grid__load-more:disabled {
