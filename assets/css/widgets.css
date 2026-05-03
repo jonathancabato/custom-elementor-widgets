@@ -1,0 +1,9 @@
+/**
+ * Custom Elements for Elementor — Widget Styles
+ *
+ * Global styles shared across all custom widgets.
+ * Each widget's styles should be scoped under its own selector, e.g.:
+ *
+ *   .ce-news-ticker { ... }
+ *   .ce-article-card { ... }
+ */
