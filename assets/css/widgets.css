@@ -222,3 +222,608 @@
 .ce-post-slider[data-pager="none"] .bx-wrapper .bx-pager {
     display: none !important;
 }
+
+/* ─── Post Grid ────────────────────────────────────────────────────────────── */
+
+.ce-post-grid {
+    position: relative;
+}
+
+/* ── Header (title bar + optional top-right button) ── */
+
+/* Base — shared by all styles */
+.ce-post-grid__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ce-post-grid__header--has-btn {
+    justify-content: space-between;
+}
+
+/* Base title reset — each style modifier overrides what it needs */
+.ce-post-grid__title {
+    font-size: var(--ce-grid-title-bar-fs, 1.125rem);
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 1 · Border Left
+   Left accent bar + full-width bottom rule
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--border-left {
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.ce-post-grid__header--border-left .ce-post-grid__title {
+    padding-left: 12px;
+    border-left: 4px solid #111;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 2 · Underline
+   Coloured underline that grows from the left only
+   under the title text; no surrounding border
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--underline {
+    padding-bottom: 0;
+}
+
+.ce-post-grid__header--underline .ce-post-grid__title {
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.ce-post-grid__header--underline .ce-post-grid__title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: #111;
+    border-radius: 2px;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 3 · Filled Bar
+   Full-width dark background strip, white title text
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--filled {
+    background: #111;
+    padding: 10px 16px;
+    border-radius: 4px;
+}
+
+.ce-post-grid__header--filled .ce-post-grid__title {
+    color: #fff;
+}
+
+.ce-post-grid__header--filled .ce-post-grid__load-more {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.ce-post-grid__header--filled .ce-post-grid__load-more:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fff;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 4 · Tag / Label
+   Title text sits inside a small dark pill;
+   a hairline rule extends to the right
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--tag {
+    gap: 12px;
+}
+
+.ce-post-grid__header--tag::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e5e5;
+}
+
+.ce-post-grid__header--has-btn.ce-post-grid__header--tag::after {
+    display: none;
+    /* rule would look odd with a button on the right */
+}
+
+.ce-post-grid__header--tag .ce-post-grid__title {
+    display: inline-block;
+    background: #111;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: calc(var(--ce-grid-title-bar-fs, 1.125rem) * 0.85);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* ────────────────────────────────────────────────────
+   Style 5 · Double Rule
+   Two horizontal rules flanking a centred title
+   (newspaper / magazine section divider)
+   ──────────────────────────────────────────────────── */
+.ce-post-grid__header--double-rule {
+    gap: 14px;
+    padding: 0;
+}
+
+.ce-post-grid__header--double-rule::before,
+.ce-post-grid__header--double-rule::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: #111;
+}
+
+.ce-post-grid__header--has-btn.ce-post-grid__header--double-rule::after {
+    display: none;
+    /* suppress trailing rule when the Load More btn is present */
+}
+
+.ce-post-grid__header--double-rule .ce-post-grid__title {
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: calc(var(--ce-grid-title-bar-fs, 1.125rem) * 0.9);
+}
+
+/* ── Grid layout ── */
+
+.ce-post-grid__grid {
+    display: grid;
+    gap: 24px;
+}
+
+.ce-post-grid__grid--cols-1 {
+    grid-template-columns: 1fr;
+}
+
+.ce-post-grid__grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.ce-post-grid__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.ce-post-grid__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.ce-post-grid__grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.ce-post-grid__grid--cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+/* ── Card ── */
+
+/* Base — shared by all card styles */
+.ce-post-grid__card {
+    position: relative;
+    min-width: 0;
+    /* prevent grid blowout */
+}
+
+.ce-post-grid__card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.ce-post-grid__thumb {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 6px;
+    aspect-ratio: 16 / 9;
+    background: #f0f0f0;
+}
+
+.ce-post-grid__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.ce-post-grid__card-link:hover .ce-post-grid__thumb img {
+    transform: scale(1.04);
+}
+
+.ce-post-grid__thumb--no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8e8e8;
+}
+
+.ce-post-grid__thumb-placeholder {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ccc;
+}
+
+.ce-post-grid__card-body {
+    padding: 10px 0 4px;
+}
+
+.ce-post-grid__cat {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #c00;
+    margin-bottom: 6px;
+}
+
+.ce-post-grid__post-title {
+    font-size: var(--ce-grid-post-title-fs, 0.9375rem);
+    font-weight: 700;
+    margin: 0 0 6px;
+    line-height: 1.45;
+    color: #111;
+    transition: color 0.2s ease;
+}
+
+.ce-post-grid__card-link:hover .ce-post-grid__post-title {
+    color: #555;
+}
+
+.ce-post-grid__date {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+/* Category badge — used by overlay & magazine styles (on image) */
+.ce-post-grid__cat-badge {
+    position: absolute;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: #c00;
+    padding: 3px 8px;
+    line-height: 1.6;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 1 · Standard (default)
+   Stacked image → meta → title → date. No extra rules needed beyond base.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 2 · Overlay
+   Title + date sit on top of the image via a bottom gradient.
+   Category badge is pinned top-left on the image.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--overlay .ce-post-grid__card-link {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    display: block;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 0;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__cat-badge {
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__card-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 48px 14px 14px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, transparent 100%);
+    z-index: 1;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__post-title {
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__card-link:hover .ce-post-grid__post-title {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ce-post-grid__card--overlay .ce-post-grid__date {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 3 · Horizontal
+   Fixed-width thumbnail on the left, text on the right.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--horizontal .ce-post-grid__card-link {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__thumb {
+    width: 110px;
+    flex-shrink: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: 4px;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__card-body {
+    flex: 1;
+    padding: 0;
+    min-width: 0;
+}
+
+.ce-post-grid__card--horizontal .ce-post-grid__post-title {
+    font-size: calc(var(--ce-grid-post-title-fs, 0.9375rem) * 0.95);
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 4 · Card
+   White boxed card with border-radius and a subtle lift shadow on hover.
+   Image fills the top, content is padded inside the box.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.ce-post-grid__card--card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.ce-post-grid__card--card .ce-post-grid__thumb {
+    border-radius: 0;
+    aspect-ratio: 16 / 9;
+}
+
+.ce-post-grid__card--card .ce-post-grid__card-body {
+    padding: 14px 16px 16px;
+}
+
+.ce-post-grid__card--card .ce-post-grid__card-link:hover .ce-post-grid__post-title {
+    color: #333;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Style 5 · Magazine
+   Taller aspect-ratio image with a coloured category badge overlaid
+   top-left, and a larger, bolder title below the image.
+───────────────────────────────────────────────────────────────────────────── */
+.ce-post-grid__card--magazine .ce-post-grid__card-link {
+    position: relative;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__thumb {
+    aspect-ratio: 3 / 2;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__cat-badge {
+    top: 0;
+    left: 0;
+    border-radius: 0 0 4px 0;
+    padding: 4px 10px;
+    font-size: 0.6875rem;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__card-body {
+    padding: 12px 0 6px;
+    border-top: 3px solid #111;
+}
+
+.ce-post-grid__card--magazine .ce-post-grid__post-title {
+    font-size: calc(var(--ce-grid-post-title-fs, 0.9375rem) * 1.1);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+/* ── Footer (bottom load-more positions) ── */
+
+.ce-post-grid__footer {
+    display: flex;
+    margin-top: 32px;
+}
+
+.ce-post-grid__footer--bottom-left {
+    justify-content: flex-start;
+}
+
+.ce-post-grid__footer--bottom-center {
+    justify-content: center;
+}
+
+.ce-post-grid__footer--bottom-right {
+    justify-content: flex-end;
+}
+
+/* ── Load More button ── */
+
+.ce-post-grid__load-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #111;
+    background: transparent;
+    border: 2px solid #111;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    line-height: 1;
+}
+
+.ce-post-grid__load-more:hover {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+.ce-post-grid__load-more:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ce-post-grid__load-more[hidden] {
+    display: none !important;
+}
+
+/* Spinner shown while AJAX request is in-flight */
+.ce-post-grid__load-more--loading::after {
+    content: '';
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: ce-spin 0.6s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes ce-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Empty state ── */
+
+.ce-post-grid__empty {
+    padding: 24px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    grid-column: 1 / -1;
+}
+
+/* ── Skeleton loading ── */
+
+@keyframes ce-shimmer {
+    0% {
+        background-position: -600px 0;
+    }
+
+    100% {
+        background-position: 600px 0;
+    }
+}
+
+.ce-post-grid__card--skeleton .ce-post-grid__thumb {
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 1200px 100%;
+    animation: ce-shimmer 1.5s infinite linear;
+}
+
+.ce-post-grid__skel-block {
+    display: block;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 1200px 100%;
+    animation: ce-shimmer 1.5s infinite linear;
+}
+
+.ce-post-grid__skel-block--cat {
+    width: 55px;
+    height: 11px;
+    margin-bottom: 8px;
+}
+
+.ce-post-grid__skel-block--title {
+    width: 90%;
+    height: 18px;
+    margin-bottom: 6px;
+}
+
+.ce-post-grid__skel-block--title-2 {
+    width: 70%;
+    height: 18px;
+    margin-bottom: 8px;
+}
+
+.ce-post-grid__skel-block--date {
+    width: 80px;
+    height: 11px;
+}
+
+/* ── Responsive breakpoints ── */
+
+@media (max-width: 1200px) {
+    .ce-post-grid__grid--cols-6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ce-post-grid__grid--cols-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .ce-post-grid__grid--cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ce-post-grid__grid--cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .ce-post-grid__grid--cols-3,
+    .ce-post-grid__grid--cols-4,
+    .ce-post-grid__grid--cols-5,
+    .ce-post-grid__grid--cols-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .ce-post-grid__grid--cols-2,
+    .ce-post-grid__grid--cols-3,
+    .ce-post-grid__grid--cols-4,
+    .ce-post-grid__grid--cols-5,
+    .ce-post-grid__grid--cols-6 {
+        grid-template-columns: 1fr;
+    }
+}

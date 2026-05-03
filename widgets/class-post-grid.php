@@ -1,0 +1,599 @@
+<?php
+namespace CustomElements\Widgets;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Post Grid widget.
+ *
+ * Displays posts in a configurable CSS grid (1–6 columns) with an optional
+ * title bar and AJAX-powered "Load More" button. Skeleton cards are shown
+ * while the next page is loading.
+ */
+class Post_Grid extends \Elementor\Widget_Base {
+
+	// ─── Identity ─────────────────────────────────────────────────────────────
+
+	public function get_name(): string {
+		return 'ce-post-grid';
+	}
+
+	public function get_title(): string {
+		return esc_html__( 'Post Grid', 'custom-elements' );
+	}
+
+	public function get_icon(): string {
+		return 'eicon-posts-grid';
+	}
+
+	public function get_categories(): array {
+		return [ 'custom-elements' ];
+	}
+
+	public function get_keywords(): array {
+		return [ 'grid', 'posts', 'news', 'category', 'load more', 'ajax' ];
+	}
+
+	public function get_script_depends(): array {
+		return [ 'custom-elements' ];
+	}
+
+	public function get_style_depends(): array {
+		return [ 'custom-elements' ];
+	}
+
+	// ─── Controls ─────────────────────────────────────────────────────────────
+
+	protected function register_controls(): void {
+
+		// ── Query ─────────────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_query',
+			[
+				'label' => esc_html__( 'Query', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'categories',
+			[
+				'label'       => esc_html__( 'Categories', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::SELECT2,
+				'options'     => $this->get_category_options(),
+				'multiple'    => true,
+				'default'     => [],
+				'label_block' => true,
+				'description' => esc_html__( 'Leave empty to show all categories.', 'custom-elements' ),
+			]
+		);
+
+		$this->add_control(
+			'posts_per_page',
+			[
+				'label'   => esc_html__( 'Initial Post Count', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::NUMBER,
+				'min'     => 1,
+				'max'     => 48,
+				'step'    => 1,
+				'default' => 6,
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Layout ────────────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_layout',
+			[
+				'label' => esc_html__( 'Layout', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'columns',
+			[
+				'label'   => esc_html__( 'Columns', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'1' => esc_html__( '1 Column',  'custom-elements' ),
+					'2' => esc_html__( '2 Columns', 'custom-elements' ),
+					'3' => esc_html__( '3 Columns', 'custom-elements' ),
+					'4' => esc_html__( '4 Columns', 'custom-elements' ),
+					'5' => esc_html__( '5 Columns', 'custom-elements' ),
+					'6' => esc_html__( '6 Columns', 'custom-elements' ),
+				],
+				'default' => '3',
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Title Bar ─────────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_title_bar',
+			[
+				'label' => esc_html__( 'Title Bar', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'show_title_bar',
+			[
+				'label'        => esc_html__( 'Show Title Bar', 'custom-elements' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'label_on'     => esc_html__( 'Show', 'custom-elements' ),
+				'label_off'    => esc_html__( 'Hide', 'custom-elements' ),
+				'return_value' => 'yes',
+				'default'      => 'yes',
+			]
+		);
+
+		$this->add_control(
+			'title_bar_style',
+			[
+				'label'     => esc_html__( 'Style', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'border-left' => esc_html__( 'Border Left',   'custom-elements' ),
+					'underline'   => esc_html__( 'Underline',     'custom-elements' ),
+					'filled'      => esc_html__( 'Filled Bar',    'custom-elements' ),
+					'tag'         => esc_html__( 'Tag / Label',   'custom-elements' ),
+					'double-rule' => esc_html__( 'Double Rule',   'custom-elements' ),
+				],
+				'default'   => 'border-left',
+				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_text',
+			[
+				'label'       => esc_html__( 'Title', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::TEXT,
+				'default'     => esc_html__( 'Latest Posts', 'custom-elements' ),
+				'placeholder' => esc_html__( 'Enter section title…', 'custom-elements' ),
+				'label_block' => true,
+				'condition'   => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_tag',
+			[
+				'label'     => esc_html__( 'HTML Tag', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'h1'  => 'H1',
+					'h2'  => 'H2',
+					'h3'  => 'H3',
+					'h4'  => 'H4',
+					'div' => 'div',
+				],
+				'default'   => 'h2',
+				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_font_size',
+			[
+				'label'     => esc_html__( 'Title Font Size', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'0.75rem'  => esc_html__( '0.75rem  — 12px', 'custom-elements' ),
+					'0.875rem' => esc_html__( '0.875rem — 14px', 'custom-elements' ),
+					'1rem'     => esc_html__( '1rem     — 16px', 'custom-elements' ),
+					'1.125rem' => esc_html__( '1.125rem — 18px', 'custom-elements' ),
+					'1.25rem'  => esc_html__( '1.25rem  — 20px', 'custom-elements' ),
+					'1.5rem'   => esc_html__( '1.5rem   — 24px', 'custom-elements' ),
+					'1.875rem' => esc_html__( '1.875rem — 30px', 'custom-elements' ),
+					'2.25rem'  => esc_html__( '2.25rem  — 36px', 'custom-elements' ),
+					'3rem'     => esc_html__( '3rem     — 48px', 'custom-elements' ),
+					'3.75rem'  => esc_html__( '3.75rem  — 60px', 'custom-elements' ),
+					'4.5rem'   => esc_html__( '4.5rem   — 72px', 'custom-elements' ),
+					'custom'   => esc_html__( 'Custom…',          'custom-elements' ),
+				],
+				'default'   => '1.125rem',
+				'condition' => [ 'show_title_bar' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'title_bar_font_size_custom',
+			[
+				'label'       => esc_html__( 'Custom Size', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'min'         => 8,
+				'max'         => 200,
+				'step'        => 1,
+				'default'     => 18,
+				'description' => esc_html__( 'Value in pixels.', 'custom-elements' ),
+				'condition'   => [
+					'show_title_bar'       => 'yes',
+					'title_bar_font_size'  => 'custom',
+				],
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Card Design ───────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_card_design',
+			[
+				'label' => esc_html__( 'Card Design', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'card_style',
+			[
+				'label'   => esc_html__( 'Style', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'standard'   => esc_html__( 'Standard',   'custom-elements' ),
+					'overlay'    => esc_html__( 'Overlay',    'custom-elements' ),
+					'horizontal' => esc_html__( 'Horizontal', 'custom-elements' ),
+					'card'       => esc_html__( 'Card',       'custom-elements' ),
+					'magazine'   => esc_html__( 'Magazine',   'custom-elements' ),
+				],
+				'default' => 'standard',
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Post Title Size ───────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_post_title',
+			[
+				'label' => esc_html__( 'Post Title', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'post_title_font_size',
+			[
+				'label'   => esc_html__( 'Font Size', 'custom-elements' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'options' => [
+					'0.75rem'  => esc_html__( '0.75rem  — 12px', 'custom-elements' ),
+					'0.875rem' => esc_html__( '0.875rem — 14px', 'custom-elements' ),
+					'1rem'     => esc_html__( '1rem     — 16px', 'custom-elements' ),
+					'1.125rem' => esc_html__( '1.125rem — 18px', 'custom-elements' ),
+					'1.25rem'  => esc_html__( '1.25rem  — 20px', 'custom-elements' ),
+					'1.5rem'   => esc_html__( '1.5rem   — 24px', 'custom-elements' ),
+					'1.875rem' => esc_html__( '1.875rem — 30px', 'custom-elements' ),
+					'2.25rem'  => esc_html__( '2.25rem  — 36px', 'custom-elements' ),
+					'3rem'     => esc_html__( '3rem     — 48px', 'custom-elements' ),
+					'3.75rem'  => esc_html__( '3.75rem  — 60px', 'custom-elements' ),
+					'4.5rem'   => esc_html__( '4.5rem   — 72px', 'custom-elements' ),
+					'custom'   => esc_html__( 'Custom…',          'custom-elements' ),
+				],
+				'default' => '0.9375rem',
+			]
+		);
+
+		$this->add_control(
+			'post_title_font_size_custom',
+			[
+				'label'       => esc_html__( 'Custom Size', 'custom-elements' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'min'         => 8,
+				'max'         => 200,
+				'step'        => 1,
+				'default'     => 15,
+				'description' => esc_html__( 'Value in pixels.', 'custom-elements' ),
+				'condition'   => [ 'post_title_font_size' => 'custom' ],
+			]
+		);
+
+		$this->end_controls_section();
+
+		// ── Load More ─────────────────────────────────────────────────────────
+		$this->start_controls_section(
+			'section_load_more',
+			[
+				'label' => esc_html__( 'Load More', 'custom-elements' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'load_more_enabled',
+			[
+				'label'        => esc_html__( 'Enable AJAX Load More', 'custom-elements' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'label_on'     => esc_html__( 'Yes', 'custom-elements' ),
+				'label_off'    => esc_html__( 'No', 'custom-elements' ),
+				'return_value' => 'yes',
+				'default'      => 'yes',
+			]
+		);
+
+		$this->add_control(
+			'load_more_position',
+			[
+				'label'     => esc_html__( 'Button Position', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'options'   => [
+					'bottom-left'   => esc_html__( 'Bottom Left',              'custom-elements' ),
+					'bottom-center' => esc_html__( 'Bottom Center',            'custom-elements' ),
+					'bottom-right'  => esc_html__( 'Bottom Right',             'custom-elements' ),
+					'top-right'     => esc_html__( 'Top Right (beside title)', 'custom-elements' ),
+				],
+				'default'   => 'bottom-center',
+				'condition' => [ 'load_more_enabled' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'posts_per_load',
+			[
+				'label'     => esc_html__( 'Posts Per Load', 'custom-elements' ),
+				'type'      => \Elementor\Controls_Manager::NUMBER,
+				'min'       => 1,
+				'max'       => 24,
+				'step'      => 1,
+				'default'   => 6,
+				'condition' => [ 'load_more_enabled' => 'yes' ],
+			]
+		);
+
+		$this->end_controls_section();
+	}
+
+	// ─── Helpers ──────────────────────────────────────────────────────────────
+
+	/**
+	 * Returns all registered categories as SELECT2 options.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_category_options(): array {
+		$options = [];
+
+		$terms = get_terms(
+			[
+				'taxonomy'   => 'category',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			]
+		);
+
+		if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$options[ (string) $term->term_id ] = $term->name;
+			}
+		}
+
+		return $options;
+	}
+
+	// ─── Render ───────────────────────────────────────────────────────────────
+
+	protected function render(): void {
+		$settings = $this->get_settings_for_display();
+
+		$categories     = ! empty( $settings['categories'] ) ? (array) $settings['categories'] : [];
+		$posts_per_page = max( 1, (int) ( $settings['posts_per_page'] ?? 6 ) );
+		$columns        = in_array( (string) ( $settings['columns'] ?? '3' ), [ '1', '2', '3', '4', '5', '6' ], true )
+							? (string) $settings['columns'] : '3';
+		$card_style     = in_array( $settings['card_style'] ?? 'standard', [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ], true )
+							? $settings['card_style'] : 'standard';
+		$show_title_bar   = ( $settings['show_title_bar'] ?? 'yes' ) === 'yes';
+		$title_bar_text   = sanitize_text_field( $settings['title_bar_text'] ?? '' );
+		$title_bar_tag    = in_array( $settings['title_bar_tag'] ?? 'h2', [ 'h1', 'h2', 'h3', 'h4', 'div' ], true )
+							? $settings['title_bar_tag'] : 'h2';
+		$title_bar_style  = in_array( $settings['title_bar_style'] ?? 'border-left', [ 'border-left', 'underline', 'filled', 'tag', 'double-rule' ], true )
+							? $settings['title_bar_style'] : 'border-left';
+
+		// Title bar font size
+		$valid_fs = [ '0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.5rem', '1.875rem', '2.25rem', '3rem', '3.75rem', '4.5rem' ];
+		$tbfs_preset = $settings['title_bar_font_size'] ?? '1.125rem';
+		$title_bar_fs = ( 'custom' === $tbfs_preset )
+			? ( (int) ( $settings['title_bar_font_size_custom'] ?? 18 ) ) . 'px'
+			: ( in_array( $tbfs_preset, $valid_fs, true ) ? $tbfs_preset : '1.125rem' );
+
+		// Post title font size
+		$ptfs_preset = $settings['post_title_font_size'] ?? '0.9375rem';
+		$post_title_fs = ( 'custom' === $ptfs_preset )
+			? ( (int) ( $settings['post_title_font_size_custom'] ?? 15 ) ) . 'px'
+			: ( in_array( $ptfs_preset, $valid_fs, true ) ? $ptfs_preset : '0.9375rem' );
+
+		$load_more      = ( $settings['load_more_enabled'] ?? 'yes' ) === 'yes';
+		$lm_position    = in_array( $settings['load_more_position'] ?? 'bottom-center', [ 'bottom-left', 'bottom-center', 'bottom-right', 'top-right' ], true )
+							? $settings['load_more_position'] : 'bottom-center';
+		$posts_per_load = max( 1, (int) ( $settings['posts_per_load'] ?? 6 ) );
+
+		$args = [
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => $posts_per_page,
+			'paged'          => 1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		];
+
+		if ( ! empty( $categories ) ) {
+			$args['category__in'] = array_map( 'intval', $categories );
+		}
+
+		$query    = new \WP_Query( $args );
+		$has_more = $query->max_num_pages > 1;
+
+		$widget_id       = esc_attr( $this->get_id() );
+		$cat_ids_encoded = esc_attr( implode( ',', array_map( 'intval', $categories ) ) );
+
+		$show_header = $show_title_bar || ( $load_more && 'top-right' === $lm_position );
+		$show_footer = $load_more && in_array( $lm_position, [ 'bottom-left', 'bottom-center', 'bottom-right' ], true );
+		?>
+		<div class="ce-post-grid"
+			id="ce-post-grid-<?php echo $widget_id; ?>"
+			data-widget-id="<?php echo $widget_id; ?>"
+			data-cols="<?php echo esc_attr( $columns ); ?>"
+			data-ppp="<?php echo esc_attr( (string) $posts_per_page ); ?>"
+			data-ppl="<?php echo esc_attr( (string) $posts_per_load ); ?>"
+			data-cats="<?php echo $cat_ids_encoded; ?>"
+			data-page="1"
+			data-has-more="<?php echo $has_more ? '1' : '0'; ?>"
+			data-card-style="<?php echo esc_attr( $card_style ); ?>"
+			style="--ce-grid-title-bar-fs: <?php echo esc_attr( $title_bar_fs ); ?>; --ce-grid-post-title-fs: <?php echo esc_attr( $post_title_fs ); ?>;">
+
+			<?php if ( $show_header ) : ?>
+			<div class="ce-post-grid__header ce-post-grid__header--<?php echo esc_attr( $title_bar_style ); ?><?php echo ( $load_more && 'top-right' === $lm_position ) ? ' ce-post-grid__header--has-btn' : ''; ?>">
+				<?php if ( $show_title_bar ) : ?>
+				<<?php echo esc_attr( $title_bar_tag ); ?> class="ce-post-grid__title">
+					<?php echo esc_html( $title_bar_text ); ?>
+				</<?php echo esc_attr( $title_bar_tag ); ?>>
+				<?php endif; ?>
+
+				<?php if ( $load_more && 'top-right' === $lm_position ) : ?>
+				<button class="ce-post-grid__load-more"<?php echo ! $has_more ? ' hidden' : ''; ?>>
+					<?php esc_html_e( 'Load More', 'custom-elements' ); ?>
+				</button>
+				<?php endif; ?>
+			</div>
+			<?php endif; ?>
+
+			<div class="ce-post-grid__grid ce-post-grid__grid--cols-<?php echo esc_attr( $columns ); ?>">
+				<?php
+				if ( $query->have_posts() ) {
+					while ( $query->have_posts() ) {
+						$query->the_post();
+						self::render_card( get_the_ID(), $card_style );
+					}
+					wp_reset_postdata();
+				} else {
+					echo '<p class="ce-post-grid__empty">' . esc_html__( 'No posts found.', 'custom-elements' ) . '</p>';
+				}
+				?>
+			</div>
+
+			<?php if ( $show_footer ) : ?>
+			<div class="ce-post-grid__footer ce-post-grid__footer--<?php echo esc_attr( $lm_position ); ?>">
+				<button class="ce-post-grid__load-more"<?php echo ! $has_more ? ' hidden' : ''; ?>>
+					<?php esc_html_e( 'Load More', 'custom-elements' ); ?>
+				</button>
+			</div>
+			<?php endif; ?>
+
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render a single post card.
+	 * Called from render() and ajax_load_more() so output is identical.
+	 *
+	 * @param int    $post_id
+	 * @param string $card_style  One of: standard | overlay | horizontal | card | magazine
+	 */
+	public static function render_card( int $post_id, string $card_style = 'standard' ): void {
+		$valid_styles = [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ];
+		$card_style   = in_array( $card_style, $valid_styles, true ) ? $card_style : 'standard';
+
+		$permalink = get_permalink( $post_id );
+		$title     = get_the_title( $post_id );
+		$date      = get_the_date( get_option( 'date_format' ), $post_id );
+		$date_iso  = get_the_date( 'c', $post_id );
+		$cats      = get_the_category( $post_id );
+		$cat_name  = ! empty( $cats ) ? esc_html( $cats[0]->name ) : '';
+		$cat_link  = ! empty( $cats ) ? esc_url( (string) get_category_link( $cats[0]->term_id ) ) : '';
+		$thumb     = get_the_post_thumbnail( $post_id, 'magazine_thumbnail' );
+		$no_image  = ! $thumb;
+		?>
+		<article class="ce-post-grid__card ce-post-grid__card--<?php echo esc_attr( $card_style ); ?>">
+			<a href="<?php echo esc_url( (string) $permalink ); ?>" class="ce-post-grid__card-link">
+				<figure class="ce-post-grid__thumb<?php echo $no_image ? ' ce-post-grid__thumb--no-image' : ''; ?>">
+					<?php if ( $thumb ) : ?>
+						<?php echo $thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php else : ?>
+						<span class="ce-post-grid__thumb-placeholder" aria-hidden="true"></span>
+					<?php endif; ?>
+					<?php if ( $cat_name && in_array( $card_style, [ 'magazine', 'overlay' ], true ) ) : ?>
+					<span class="ce-post-grid__cat-badge"><?php echo $cat_name; ?></span>
+					<?php endif; ?>
+				</figure>
+				<div class="ce-post-grid__card-body">
+					<?php if ( $cat_name && ! in_array( $card_style, [ 'magazine', 'overlay' ], true ) ) : ?>
+					<span class="ce-post-grid__cat"><?php echo $cat_name; ?></span>
+					<?php endif; ?>
+					<h3 class="ce-post-grid__post-title"><?php echo esc_html( $title ); ?></h3>
+					<time class="ce-post-grid__date" datetime="<?php echo esc_attr( (string) $date_iso ); ?>">
+						<?php echo esc_html( (string) $date ); ?>
+					</time>
+				</div>
+			</a>
+		</article>
+		<?php
+	}
+
+	// ─── AJAX ─────────────────────────────────────────────────────────────────
+
+	/**
+	 * Handle the Load More AJAX request.
+	 *
+	 * Hooked to:
+	 *   wp_ajax_ce_post_grid_load_more
+	 *   wp_ajax_nopriv_ce_post_grid_load_more
+	 */
+	public static function ajax_load_more(): void {
+		// ── Security ──────────────────────────────────────────────────────────
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'ce_post_grid_load_more' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Security check failed.', 'custom-elements' ) ], 403 );
+		}
+
+		// ── Parameters ────────────────────────────────────────────────────────
+		$page           = max( 1, (int) ( $_POST['page'] ?? 1 ) );
+		$posts_per_load = max( 1, min( 24, (int) ( $_POST['ppl'] ?? 6 ) ) );
+		$cats_raw       = isset( $_POST['cats'] ) ? sanitize_text_field( wp_unslash( $_POST['cats'] ) ) : '';
+		$categories     = array_filter( array_map( 'intval', explode( ',', $cats_raw ) ) );
+		$valid_styles   = [ 'standard', 'overlay', 'horizontal', 'card', 'magazine' ];
+		$card_style_raw = isset( $_POST['card_style'] ) ? sanitize_text_field( wp_unslash( $_POST['card_style'] ) ) : 'standard';
+		$card_style     = in_array( $card_style_raw, $valid_styles, true ) ? $card_style_raw : 'standard';
+
+		// ── Query ─────────────────────────────────────────────────────────────
+		$args = [
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => $posts_per_load,
+			'paged'          => $page,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		];
+
+		if ( ! empty( $categories ) ) {
+			$args['category__in'] = $categories;
+		}
+
+		$query = new \WP_Query( $args );
+
+		// ── Render ────────────────────────────────────────────────────────────
+		ob_start();
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				self::render_card( get_the_ID(), $card_style );
+			}
+			wp_reset_postdata();
+		}
+		$html = (string) ob_get_clean();
+
+		wp_send_json_success(
+			[
+				'html'     => $html,
+				'has_more' => $query->max_num_pages > $page,
+			]
+		);
+	}
+}

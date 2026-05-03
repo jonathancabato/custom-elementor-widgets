@@ -50,6 +50,8 @@ final class Plugin {
 		add_action( 'elementor/widgets/register',              [ $this, 'register_widgets' ] );
 		add_action( 'elementor/frontend/after_enqueue_styles',  [ $this, 'enqueue_styles' ] );
 		add_action( 'elementor/frontend/after_register_scripts', [ $this, 'register_scripts' ] );
+		add_action( 'wp_ajax_ce_post_grid_load_more',        [ $this, 'handle_post_grid_load_more' ] );
+		add_action( 'wp_ajax_nopriv_ce_post_grid_load_more', [ $this, 'handle_post_grid_load_more' ] );
 	}
 
 	// ─── Callbacks ────────────────────────────────────────────────────────────
@@ -139,5 +141,22 @@ final class Plugin {
 			CUSTOM_ELEMENTS_VERSION,
 			true
 		);
+
+		wp_localize_script(
+			'custom-elements',
+			'ceAjax',
+			[
+				'url'   => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'ce_post_grid_load_more' ),
+			]
+		);
+	}
+
+	/**
+	 * Delegate the Post Grid load-more AJAX request to the widget's static handler.
+	 */
+	public function handle_post_grid_load_more(): void {
+		require_once CUSTOM_ELEMENTS_PATH . 'widgets/class-post-grid.php';
+		\CustomElements\Widgets\Post_Grid::ajax_load_more();
 	}
 }
